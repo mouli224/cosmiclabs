@@ -123,7 +123,7 @@ export default function Cooper() {
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.15, duration: 0.4 }}
-              className="relative px-4 py-3 rounded-2xl rounded-br-sm max-w-[220px] text-right"
+              className="relative px-4 py-3 rounded-2xl rounded-br-sm max-w-[200px]"
               style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <p className="text-white text-[13px] font-medium leading-snug">Hey there! 👋</p>
@@ -131,7 +131,6 @@ export default function Cooper() {
                 I&apos;m <span className="text-white/80">Cooper</span>, CosmicLabs AI agent.
                 <br />Ask me anything!
               </p>
-              {/* Tail */}
               <span
                 className="absolute bottom-2 -right-1.5 w-3 h-3 rotate-45"
                 style={{ background: "rgba(255,255,255,0.07)", borderRight: "1px solid rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
@@ -144,10 +143,10 @@ export default function Cooper() {
               aria-label="Open Cooper"
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.95 }}
-              className="relative w-14 h-14 rounded-full overflow-hidden border border-white/10 bg-black shrink-0"
-              style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}
+              className="shrink-0 rounded-full overflow-hidden border border-white/10 bg-black"
+              style={{ width: 56, height: 56, boxShadow: "0 8px 32px rgba(0,0,0,0.6)", position: "relative" }}
             >
-              <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
+              <Image src={COOPER_IMG} alt="" width={56} height={56} className="object-cover w-full h-full" />
               <motion.span
                 className="absolute inset-0 rounded-full border border-white/30"
                 animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
@@ -180,8 +179,8 @@ export default function Cooper() {
               className="flex items-center gap-3 px-4 py-3 shrink-0"
               style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
             >
-              <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-white/5">
-                <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
+              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-white/5">
+                <Image src={COOPER_IMG} alt="" width={36} height={36} className="object-cover w-full h-full" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-semibold leading-tight">Cooper</p>
@@ -210,8 +209,8 @@ export default function Cooper() {
                   className="flex flex-col gap-3"
                 >
                   <div className="flex gap-2.5 items-start">
-                    <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/5 mt-0.5">
-                      <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
+                    <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/5 mt-0.5">
+                      <Image src={COOPER_IMG} alt="" width={28} height={28} className="object-cover w-full h-full" />
                     </div>
                     <div
                       className="text-white/80 text-[13px] leading-relaxed px-3.5 py-2.5 rounded-2xl rounded-tl-sm max-w-[85%]"
@@ -249,8 +248,8 @@ export default function Cooper() {
                     className={`flex gap-2.5 items-start ${isUser ? "flex-row-reverse" : ""}`}
                   >
                     {!isUser && (
-                      <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/5 mt-0.5">
-                        <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
+                      <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/5 mt-0.5">
+                        <Image src={COOPER_IMG} alt="" width={28} height={28} className="object-cover w-full h-full" />
                       </div>
                     )}
                     <div
@@ -320,10 +319,10 @@ export default function Cooper() {
           animate={{ scale: 1, opacity: 1 }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.95 }}
-          className="relative w-14 h-14 rounded-full overflow-hidden shadow-2xl border border-white/10 bg-black"
-          style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
+          className="shrink-0 rounded-full overflow-hidden border border-white/10 bg-black"
+          style={{ width: 56, height: 56, boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)", position: "relative" }}
         >
-          <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
+          <Image src={COOPER_IMG} alt="" width={56} height={56} className="object-cover w-full h-full" />
           {!open && (
             <motion.span
               className="absolute inset-0 rounded-full border border-white/20"
