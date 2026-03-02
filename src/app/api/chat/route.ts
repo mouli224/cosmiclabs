@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     model: hf(MODEL),
     system: SYSTEM_PROMPT,
     messages,
-    maxTokens: 300,
+    maxOutputTokens: 300,
   });
 
   return result.toDataStreamResponse();
