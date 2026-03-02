@@ -24,8 +24,18 @@ export default function Cooper() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // intro: "hidden" → "visible" (show card) → "collapsing" (shrink to button) → "done"
+  const [introPhase, setIntroPhase] = useState<"hidden" | "visible" | "collapsing" | "done">("hidden");
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Intro popup sequence
+  useEffect(() => {
+    const showTimer = setTimeout(() => setIntroPhase("visible"), 2500);
+    const collapseTimer = setTimeout(() => setIntroPhase("collapsing"), 7000);
+    const doneTimer = setTimeout(() => setIntroPhase("done"), 7800);
+    return () => { clearTimeout(showTimer); clearTimeout(collapseTimer); clearTimeout(doneTimer); };
+  }, []);
 
   // Auto-scroll on new content
   useEffect(() => {
@@ -86,8 +96,68 @@ export default function Cooper() {
     }
   };
 
+  const handleOpen = () => {
+    setIntroPhase("done");
+    setOpen((v) => !v);
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3">
+      {/* ── Intro popup card ── */}
+      <AnimatePresence>
+        {(introPhase === "visible" || introPhase === "collapsing") && !open && (
+          <motion.div
+            key="intro"
+            initial={{ opacity: 0, y: 16, scale: 0.9 }}
+            animate={
+              introPhase === "collapsing"
+                ? { opacity: 0, y: 40, scale: 0.4 }
+                : { opacity: 1, y: 0, scale: 1 }
+            }
+            exit={{ opacity: 0, y: 40, scale: 0.4 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-end gap-3"
+          >
+            {/* Speech bubble */}
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="relative px-4 py-3 rounded-2xl rounded-br-sm max-w-[220px] text-right"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <p className="text-white text-[13px] font-medium leading-snug">Hey there! 👋</p>
+              <p className="text-white/50 text-[12px] leading-snug mt-0.5">
+                I&apos;m <span className="text-white/80">Cooper</span>, CosmicLabs AI agent.
+                <br />Ask me anything!
+              </p>
+              {/* Tail */}
+              <span
+                className="absolute bottom-2 -right-1.5 w-3 h-3 rotate-45"
+                style={{ background: "rgba(255,255,255,0.07)", borderRight: "1px solid rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+              />
+            </motion.div>
+
+            {/* Avatar */}
+            <motion.button
+              onClick={handleOpen}
+              aria-label="Open Cooper"
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative w-14 h-14 rounded-full overflow-hidden border border-white/10 bg-black shrink-0"
+              style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}
+            >
+              <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
+              <motion.span
+                className="absolute inset-0 rounded-full border border-white/30"
+                animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+              />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Chat panel ── */}
       <AnimatePresence>
         {open && (
@@ -241,26 +311,28 @@ export default function Cooper() {
         )}
       </AnimatePresence>
 
-      {/* ── Launcher button ── */}
-      <motion.button
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Open Cooper chat"
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.95 }}
-        className="relative w-14 h-14 rounded-full overflow-hidden shadow-2xl border border-white/10 bg-black"
-        style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
-      >
-        <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
-
-        {/* Pulse ring when closed */}
-        {!open && (
-          <motion.span
-            className="absolute inset-0 rounded-full border border-white/20"
-            animate={{ scale: [1, 1.35], opacity: [0.4, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-          />
-        )}
-      </motion.button>
+      {/* ── Launcher button (shown after intro collapses) ── */}
+      {(introPhase === "done" || open) && (
+        <motion.button
+          onClick={handleOpen}
+          aria-label="Open Cooper chat"
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative w-14 h-14 rounded-full overflow-hidden shadow-2xl border border-white/10 bg-black"
+          style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
+        >
+          <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
+          {!open && (
+            <motion.span
+              className="absolute inset-0 rounded-full border border-white/20"
+              animate={{ scale: [1, 1.35], opacity: [0.4, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+            />
+          )}
+        </motion.button>
+      )}
     </div>
   );
 }
