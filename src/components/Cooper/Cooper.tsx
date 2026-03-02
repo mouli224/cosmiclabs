@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import cooperImg from "@/app/assets/cooper.png";
+
+const COOPER_IMG = "/cooper.png";
 
 interface Message {
   id: string;
@@ -120,7 +121,7 @@ export default function Cooper() {
               style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
             >
               <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-white/5">
-                <Image src={cooperImg} alt="Cooper" fill className="object-cover" />
+                <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-semibold leading-tight">Cooper</p>
@@ -150,7 +151,7 @@ export default function Cooper() {
                 >
                   <div className="flex gap-2.5 items-start">
                     <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/5 mt-0.5">
-                      <Image src={cooperImg} alt="Cooper" fill className="object-cover" />
+                      <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
                     </div>
                     <div
                       className="text-white/80 text-[13px] leading-relaxed px-3.5 py-2.5 rounded-2xl rounded-tl-sm max-w-[85%]"
@@ -189,7 +190,7 @@ export default function Cooper() {
                   >
                     {!isUser && (
                       <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/5 mt-0.5">
-                        <Image src={cooperImg} alt="Cooper" fill className="object-cover" />
+                        <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
                       </div>
                     )}
                     <div
@@ -259,7 +260,7 @@ export default function Cooper() {
         className="relative w-14 h-14 rounded-full overflow-hidden shadow-2xl border border-white/10 bg-black"
         style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
       >
-        <Image src={cooperImg} alt="Cooper" fill className="object-cover" />
+        <Image src={COOPER_IMG} alt="Cooper" fill className="object-cover" />
 
         {/* Pulse ring when closed */}
         {!open && (
