@@ -38,5 +38,5 @@ export async function POST(req: Request) {
     maxOutputTokens: 300,
   });
 
-  return result.toDataStreamResponse();
+  return result.toTextStreamResponse();
 }
