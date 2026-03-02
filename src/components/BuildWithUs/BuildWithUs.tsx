@@ -70,6 +70,7 @@ export default function BuildWithUs() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -91,10 +92,26 @@ export default function BuildWithUs() {
     if (!form.name || !form.email || !form.message) return;
 
     setLoading(true);
-    // Simulate async send (replace with actual API call / email service)
-    await new Promise((res) => setTimeout(res, 1200));
-    setLoading(false);
-    setSubmitted(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Something went wrong.");
+      }
+
+      setSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -248,6 +265,16 @@ export default function BuildWithUs() {
                     ease: [0.22, 1, 0.36, 1],
                   }}
                 >
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-red-400/80 text-xs tracking-wide"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+
                   <button
                     type="submit"
                     disabled={loading}
