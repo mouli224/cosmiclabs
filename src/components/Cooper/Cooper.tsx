@@ -1,10 +1,15 @@
 "use client";
 
-import { useChat } from "ai/react";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import cooperImg from "@/app/assets/cooper.png";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
 
 const SUGGESTIONS = [
   "What does CosmicLabs do?",
@@ -15,32 +20,79 @@ const SUGGESTIONS = [
 
 export default function Cooper() {
   const [open, setOpen] = useState(false);
-  const [hasOpened, setHasOpened] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setInput } =
-    useChat({ api: "/api/chat" });
-
-  // Auto-scroll to bottom on new message
+  // Auto-scroll on new content
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  // Focus input when chat opens
+  // Focus input when opened
   useEffect(() => {
-    if (open) {
-      setHasOpened(true);
-      setTimeout(() => inputRef.current?.focus(), 350);
-    }
+    if (open) setTimeout(() => inputRef.current?.focus(), 350);
   }, [open]);
 
-  const sendSuggestion = (text: string) => {
-    setInput(text);
-    setTimeout(() => {
-      const form = document.getElementById("cooper-form") as HTMLFormElement;
-      form?.requestSubmit();
-    }, 50);
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || isLoading) return;
+
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: text };
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
+    setInput("");
+    setIsLoading(true);
+
+    const assistantId = (Date.now() + 1).toString();
+    setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "" }]);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: updatedMessages.map(({ role, content }) => ({ role, content })),
+        }),
+      });
+
+      if (!res.ok || !res.body) throw new Error("Failed");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (line.startsWith("0:")) {
+            try {
+              const chunk = JSON.parse(line.slice(2));
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId ? { ...m, content: m.content + chunk } : m
+                )
+              );
+            } catch { /* skip */ }
+          }
+        }
+      }
+    } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? { ...m, content: "Sorry, something went wrong. Please try again." }
+            : m
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -110,19 +162,17 @@ export default function Cooper() {
                   </div>
 
                   {/* Suggestion chips */}
-                  {!hasOpened || messages.length === 0 ? (
-                    <div className="flex flex-wrap gap-2 pl-9">
-                      {SUGGESTIONS.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => sendSuggestion(s)}
-                          className="text-[11px] text-white/40 hover:text-white/80 border border-white/10 hover:border-white/30 rounded-full px-3 py-1 transition-all duration-200"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
+                  <div className="flex flex-wrap gap-2 pl-9">
+                    {SUGGESTIONS.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => sendMessage(s)}
+                        className="text-[11px] text-white/40 hover:text-white/80 border border-white/10 hover:border-white/30 rounded-full px-3 py-1 transition-all duration-200"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
                 </motion.div>
               )}
 
@@ -150,52 +200,36 @@ export default function Cooper() {
                       }`}
                       style={!isUser ? { background: "rgba(255,255,255,0.06)" } : {}}
                     >
-                      {m.content}
+                      {m.content || (
+                        <span className="flex gap-1.5 items-center py-0.5">
+                          {[0, 1, 2].map((i) => (
+                            <motion.span
+                              key={i}
+                              className="w-1.5 h-1.5 rounded-full bg-white/40 block"
+                              animate={{ opacity: [0.3, 1, 0.3] }}
+                              transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                            />
+                          ))}
+                        </span>
+                      )}
                     </div>
                   </motion.div>
                 );
               })}
-
-              {/* Typing indicator */}
-              {isLoading && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex gap-2.5 items-start"
-                >
-                  <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/5">
-                    <Image src={cooperImg} alt="Cooper" fill className="object-cover" />
-                  </div>
-                  <div
-                    className="px-4 py-3 rounded-2xl rounded-tl-sm flex gap-1.5 items-center"
-                    style={{ background: "rgba(255,255,255,0.06)" }}
-                  >
-                    {[0, 1, 2].map((i) => (
-                      <motion.span
-                        key={i}
-                        className="w-1.5 h-1.5 rounded-full bg-white/40 block"
-                        animate={{ opacity: [0.3, 1, 0.3] }}
-                        transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
 
               <div ref={bottomRef} />
             </div>
 
             {/* Input */}
             <form
-              id="cooper-form"
-              onSubmit={handleSubmit}
+              onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
               className="px-3 pb-3 pt-2 shrink-0 flex items-center gap-2"
               style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
             >
               <input
                 ref={inputRef}
                 value={input}
-                onChange={handleInputChange}
+                onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask Cooper anything..."
                 autoComplete="off"
                 className="flex-1 bg-white/5 text-white text-[13px] placeholder:text-white/25 rounded-xl px-3.5 py-2.5 outline-none border border-transparent focus:border-white/15 transition-all duration-200"
