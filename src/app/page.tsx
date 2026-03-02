@@ -10,6 +10,7 @@ import WhatWeDo from "@/components/WhatWeDo/WhatWeDo";
 import WhatWeDid from "@/components/WhatWeDid/WhatWeDid";
 import WhoWeAre from "@/components/WhoWeAre/WhoWeAre";
 import BuildWithUs from "@/components/BuildWithUs/BuildWithUs";
+import Cooper from "@/components/Cooper/Cooper";
 
 /**
  * Root page component.
@@ -43,6 +44,9 @@ export default function Home() {
         <WhatWeDid />
         <BuildWithUs />
       </main>
+
+      {/* Cooper — AI chatbot (always visible above everything) */}
+      {loaderDone && <Cooper />}
     </>
   );
 }
