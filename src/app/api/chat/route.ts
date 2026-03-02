@@ -1,7 +1,15 @@
-import { openai } from "@ai-sdk/openai";
+import { createHuggingFace } from "@ai-sdk/huggingface";
 import { streamText } from "ai";
 
 export const runtime = "edge";
+
+const hf = createHuggingFace({
+  apiKey: process.env.HUGGINGFACE_API_KEY,
+});
+
+// Free HuggingFace Inference API model — swap to any instruction-tuned model you like:
+// e.g. "mistralai/Mistral-7B-Instruct-v0.3", "HuggingFaceH4/zephyr-7b-beta"
+const MODEL = "mistralai/Mistral-7B-Instruct-v0.3";
 
 const SYSTEM_PROMPT = `You are Cooper, a friendly and smart AI assistant for CosmicLabs — a technology studio that builds high-quality digital products. You live on the CosmicLabs website as a helpful guide.
 
@@ -24,7 +32,7 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-4o-mini"),
+    model: hf(MODEL),
     system: SYSTEM_PROMPT,
     messages,
     maxTokens: 300,
